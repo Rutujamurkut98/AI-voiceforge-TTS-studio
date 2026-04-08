@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VoiceForge — Text to Speech</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --bg:#f8f9fc;
+  --card:#ffffff;
+  --border:#e8eaf0;
+  --border2:#d0d4e0;
+  --text:#1a1d2e;
+  --text2:#6b7280;
+  --text3:#9ca3af;
+  --blue:#4f6ef7;
+  --blue-light:#eef0fe;
+  --blue-mid:#dde1fd;
+  --green:#22c55e;
+  --green-light:#f0fdf4;
+  --red:#ef4444;
+  --red-light:#fef2f2;
+  --orange:#f97316;
+  --orange-light:#fff7ed;
+  --purple:#8b5cf6;
+  --purple-light:#f5f3ff;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --radius:14px;
+  --radius-sm:10px;
+  --radius-xs:7px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;font-size:15px}
+
+/* ── Layout ── */
+.page{max-width:780px;margin:0 auto;padding:32px 20px 60px}
+
+/* ── Header ── */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:44px;height:44px;border-radius:12px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(79,110,247,.35)}
+.logo-text{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.4px}
+.logo-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.header-badge{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--green-light);border:1px solid #bbf7d0;font-size:12px;font-weight:600;color:var(--green)}
+
+/* ── Card ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:16px}
+.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;display:flex;align-items:center;gap:7px}
+.card-title .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0}
+
+/* ── Textarea ── */
+textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;line-height:1.8;color:var(--text);background:var(--white);resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;min-height:160px}
+textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,110,247,.1)}
+textarea::placeholder{color:var(--text3)}
+
+/* ── Upload row ── */
+.upload-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.file-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-xs);border:1.5px solid var(--border);background:var(--white);color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s}
+.file-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.clear-btn{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:var(--radius-xs);border:1.5px solid #fecaca;background:var(--red-light);color:var(--red);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s}
+.clear-btn:hover{background:#fee2e2}
+input[type=file]{display:none}
+.stats-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:8px}
+
+/* ── Language + Gender row ── */
+.voice-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:540px){.voice-grid{grid-template-columns:1fr}}
+.field-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:7px}
+select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);background:var(--white);outline:none;cursor:pointer;transition:border-color .2s}
+select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,110,247,.1)}
+select option{color:var(--text)}
+
+/* ── Gender pills ── */
+.gender-row{display:flex;gap:8px}
+.gpill{flex:1;padding:9px;border-radius:var(--radius-xs);border:1.5px solid var(--border);background:var(--white);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .18s;text-align:center}
+.gpill:hover{border-color:var(--blue);color:var(--blue)}
+.gpill.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:600}
+
+/* ── Voice version cards ── */
+.voice-versions{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:4px}
+.vv-card{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 12px;cursor:pointer;transition:all .2s;background:var(--white);text-align:center;user-select:none;position:relative}
+.vv-card:hover{border-color:var(--blue);background:var(--blue-light);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.vv-card.active{border-color:var(--blue);background:var(--blue-light);box-shadow:0 0 0 3px rgba(79,110,247,.12)}
+.vv-card.active::after{content:'✓';position:absolute;top:6px;right:8px;font-size:11px;font-weight:700;color:var(--blue)}
+.vv-emoji{font-size:26px;margin-bottom:6px}
+.vv-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.vv-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.vv-params{font-size:10px;color:var(--blue);font-weight:600;margin-top:4px}
+
+/* ── Sliders ── */
+.slider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:540px){.slider-grid{grid-template-columns:1fr}}
+.slider-wrap{display:flex;flex-direction:column;gap:6px}
+.slider-top{display:flex;justify-content:space-between;align-items:center}
+.slider-label{font-size:13px;font-weight:600;color:var(--text)}
+.slider-val{font-size:13px;font-weight:700;color:var(--blue);min-width:36px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--blue);box-shadow:0 1px 4px rgba(79,110,247,.4);cursor:pointer;transition:transform .15s}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2)}
+.slider-minmax{display:flex;justify-content:space-between;font-size:10px;color:var(--text3)}
+
+/* ── Playback controls ── */
+.controls-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.ctrl-btn{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:var(--radius-sm);border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.ctrl-btn:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
+.btn-play{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(79,110,247,.4)}
+.btn-play:hover:not(:disabled){background:#3d5ce5;box-shadow:0 6px 20px rgba(79,110,247,.5);transform:translateY(-1px)}
+.btn-pause{background:var(--orange-light);color:var(--orange);border:1.5px solid #fed7aa}
+.btn-pause:hover:not(:disabled){background:#ffedd5}
+.btn-resume{background:var(--purple-light);color:var(--purple);border:1.5px solid #ddd6fe}
+.btn-resume:hover:not(:disabled){background:#ede9fe}
+.btn-stop{background:var(--red-light);color:var(--red);border:1.5px solid #fecaca}
+.btn-stop:hover:not(:disabled){background:#fee2e2}
+.btn-download{background:var(--green-light);color:var(--green);border:1.5px solid #bbf7d0;margin-left:auto}
+.btn-download:hover:not(:disabled){background:#dcfce7}
+.btn-download.loading{opacity:.7;cursor:wait}
+
+/* ── Progress ── */
+.progress-wrap{margin-bottom:16px}
+.progress-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:7px;font-weight:500}
+.progress-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:3px;transition:width .4s ease;width:0%}
+
+/* ── Spoken box ── */
+.spoken-section{margin-top:18px;display:none}
+.spoken-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px}
+.spoken-box{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:14px;line-height:2;min-height:56px}
+.s-done{color:var(--text3)}
+.s-active{background:var(--blue-light);color:var(--blue);font-weight:600;border-radius:4px;padding:1px 5px}
+.s-pending{color:var(--text)}
+
+/* ── Status pill ── */
+.status-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.status-pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.sp-playing{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid)}
+.sp-paused{background:var(--orange-light);color:var(--orange);border:1px solid #fed7aa}
+.sp-done{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0}
+
+/* ── Voice info bar ── */
+.voice-info-bar{display:flex;gap:12px;flex-wrap:wrap;padding:10px 14px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--radius-xs);font-size:12px;color:var(--text2);margin-top:12px}
+.voice-info-bar strong{color:var(--blue)}
+
+/* ── Warning ── */
+.warn-box{padding:10px 14px;background:var(--orange-light);border:1px solid #fed7aa;border-radius:var(--radius-xs);font-size:12px;color:var(--orange);font-weight:500;margin-top:8px}
+
+/* ── Download section ── */
+.download-section{margin-top:20px;padding:18px;border:1.5px dashed var(--border2);border-radius:var(--radius-sm);background:var(--bg);text-align:center}
+.download-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.download-sub{font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6}
+.download-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ── Toast ── */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;
+  box-shadow:var(--shadow-lg);cursor:pointer;animation:tslide .3s ease;border:1px solid transparent;max-width:320px}
+.ts{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.te{background:#fef2f2;border-color:#fecaca;color:#dc2626}
+.ti{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+.tw{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+@keyframes tslide{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── Waveform ── */
+.wave-wrap{display:flex;align-items:center;gap:3px;height:28px}
+.wb{width:3px;border-radius:2px;background:var(--blue);animation:wv 1s ease-in-out infinite;transform-origin:bottom;opacity:.7}
+.wb:nth-child(1){height:6px;animation-delay:0s}.wb:nth-child(2){height:14px;animation-delay:.1s}
+.wb:nth-child(3){height:22px;animation-delay:.2s}.wb:nth-child(4){height:16px;animation-delay:.15s}
+.wb:nth-child(5){height:24px;animation-delay:.05s}.wb:nth-child(6){height:14px;animation-delay:.25s}
+.wb:nth-child(7){height:8px;animation-delay:.3s}.wb:nth-child(8){height:18px;animation-delay:.18s}
+@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.4}50%{transform:scaleY(1);opacity:.9}}
+.wave-wrap.paused .wb{animation-play-state:paused;opacity:.25}
+.wave-wrap.stopped .wb{animation:none!important;height:3px!important;opacity:.18}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--border);margin:4px 0 20px}
+
+/* ── Sample btn ── */
+.sample-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--radius-xs);border:1.5px solid var(--border);background:var(--white);color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;margin-top:8px}
+.sample-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🎙️</div>
+      <div>
+        <div class="logo-text">VoiceForge</div>
+        <div class="logo-sub">Text to Speech Studio</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="wave-wrap stopped" id="waveform">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div>
+      </div>
+      <div class="header-badge" id="live-badge" style="display:none">● Speaking</div>
+    </div>
+  </div>
+
+  <!-- ══ CARD 1: TEXT INPUT ══ -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Enter Your Text</div>
+    <div class="upload-row">
+      <button class="file-btn" onclick="document.getElementById('pdf-file').click()">📄 Upload PDF</button>
+      <button class="file-btn" onclick="document.getElementById('txt-file').click()">📝 Upload .txt</button>
+      <button class="sample-btn" onclick="loadSample()">✨ Load Sample</button>
+      <button class="clear-btn" onclick="clearText()">✕ Clear</button>
+      <input type="file" id="pdf-file" accept=".pdf" onchange="handlePDF(this)"/>
+      <input type="file" id="txt-file" accept=".txt" onchange="handleTxt(this)"/>
+    </div>
+    <textarea id="main-text" rows="7"
+      placeholder="Type or paste your text here in any language...&#10;&#10;Telugu: నమస్కారం! &#10;Hindi: नमस्ते! &#10;Marathi: नमस्कार! &#10;Tamil: வணக்கம்! &#10;Urdu: السلام علیکم!&#10;English: Hello! Welcome to VoiceForge."
+      oninput="updateStats()"></textarea>
+    <div class="stats-row">
+      <span id="char-count">0 characters · 0 words</span>
+      <span id="time-est">Ready</span>
+    </div>
+  </div>
+
+  <!-- ══ CARD 2: LANGUAGE & VOICE ══ -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Language & Voice</div>
+    <div class="voice-grid">
+      <div>
+        <div class="field-label">🌐 Language</div>
+        <select id="lang-select" onchange="onLangChange()">
+          <optgroup label="🇮🇳 Indian Languages">
+            <option value="te-IN">🇮🇳 Telugu</option>
+            <option value="hi-IN">🇮🇳 Hindi</option>
+            <option value="mr-IN">🇮🇳 Marathi</option>
+            <option value="ta-IN">🇮🇳 Tamil</option>
+            <option value="gu-IN">🇮🇳 Gujarati</option>
+            <option value="kn-IN">🇮🇳 Kannada</option>
+            <option value="ml-IN">🇮🇳 Malayalam</option>
+            <option value="bn-IN">🇮🇳 Bengali</option>
+            <option value="pa-IN">🇮🇳 Punjabi</option>
+            <option value="or-IN">🇮🇳 Odia</option>
+            <option value="ur-PK">🇵🇰 Urdu</option>
+            <option value="ne-NP">🇳🇵 Nepali</option>
+          </optgroup>
+          <optgroup label="🇬🇧 English">
+            <option value="en-IN" selected>🇮🇳 English (India)</option>
+            <option value="en-US">🇺🇸 English (US)</option>
+            <option value="en-GB">🇬🇧 English (UK)</option>
+            <option value="en-AU">🇦🇺 English (Australia)</option>
+          </optgroup>
+          <optgroup label="🌍 Other Languages">
+            <option value="es-ES">🇪🇸 Spanish</option>
+            <option value="fr-FR">🇫🇷 French</option>
+            <option value="de-DE">🇩🇪 German</option>
+            <option value="it-IT">🇮🇹 Italian</option>
+            <option value="pt-BR">🇧🇷 Portuguese</option>
+            <option value="ru-RU">🇷🇺 Russian</option>
+            <option value="ja-JP">🇯🇵 Japanese</option>
+            <option value="zh-CN">🇨🇳 Chinese</option>
+            <option value="ko-KR">🇰🇷 Korean</option>
+            <option value="ar-SA">🇸🇦 Arabic</option>
+            <option value="tr-TR">🇹🇷 Turkish</option>
+            <option value="nl-NL">🇳🇱 Dutch</option>
+            <option value="pl-PL">🇵🇱 Polish</option>
+            <option value="sv-SE">🇸🇪 Swedish</option>
+            <option value="th-TH">🇹🇭 Thai</option>
+            <option value="vi-VN">🇻🇳 Vietnamese</option>
+            <option value="id-ID">🇮🇩 Indonesian</option>
+          </optgroup>
+        </select>
+        <button class="sample-btn" onclick="loadSample()">Load sample for this language</button>
+      </div>
+      <div>
+        <div class="field-label">👤 Gender</div>
+        <div class="gender-row">
+          <button class="gpill active" id="gpill-female" onclick="setGender('female')">♀ Female</button>
+          <button class="gpill" id="gpill-male" onclick="setGender('male')">♂ Male</button>
+        </div>
+        <div style="margin-top:12px">
+          <div class="field-label">🎤 Voice <span id="voice-count" style="color:var(--blue);font-weight:700"></span></div>
+          <select id="voice-select"></select>
+        </div>
+        <div id="warn-box" class="warn-box" style="display:none">
+          ⚠️ No voices found for this language. Go to Windows Settings → Speech → Add voices.
+        </div>
+        <div id="voice-info" class="voice-info-bar" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CARD 3: VOICE VERSIONS ══ -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Voice Style</div>
+    <div class="voice-versions" id="voice-versions"></div>
+  </div>
+
+  <!-- ══ CARD 4: FINE TUNE ══ -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Fine Tune</div>
+    <div class="slider-grid">
+      <div class="slider-wrap">
+        <div class="slider-top">
+          <span class="slider-label">⚡ Speed</span>
+          <span class="slider-val" id="rate-val">1.0×</span>
+        </div>
+        <input type="range" id="rate-sl" min="0.5" max="2" step="0.05" value="1" oninput="onSlider('rate')"/>
+        <div class="slider-minmax"><span>Slow</span><span>Fast</span></div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-top">
+          <span class="slider-label">🎵 Pitch</span>
+          <span class="slider-val" id="pitch-val">1.0</span>
+        </div>
+        <input type="range" id="pitch-sl" min="0.5" max="2" step="0.05" value="1" oninput="onSlider('pitch')"/>
+        <div class="slider-minmax"><span>Low</span><span>High</span></div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-top">
+          <span class="slider-label">🔊 Volume</span>
+          <span class="slider-val" id="vol-val">1.0</span>
+        </div>
+        <input type="range" id="vol-sl" min="0" max="1" step="0.05" value="1" oninput="onSlider('vol')"/>
+        <div class="slider-minmax"><span>Quiet</span><span>Loud</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CARD 5: PLAYBACK ══ -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> Playback</div>
+
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span id="sent-info">Ready to speak</span>
+        <span id="prog-pct" style="color:var(--blue);font-weight:700">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    </div>
+
+    <div class="controls-row">
+      <button class="ctrl-btn btn-play"   id="btn-play"   onclick="doPlay()">▶ Play</button>
+      <button class="ctrl-btn btn-pause"  id="btn-pause"  onclick="doPause()"  disabled>⏸ Pause</button>
+      <button class="ctrl-btn btn-resume" id="btn-resume" onclick="doResume()" disabled>▶ Resume</button>
+      <button class="ctrl-btn btn-stop"   id="btn-stop"   onclick="doStop()"   disabled>⏹ Stop</button>
+    </div>
+
+    <div class="status-row" id="status-row"></div>
+
+    <div class="spoken-section" id="spoken-section">
+      <div class="spoken-label">Currently reading:</div>
+      <div class="spoken-box" id="spoken-box"></div>
+    </div>
+
+    <!-- DOWNLOAD SECTION -->
+    <div class="download-section" style="margin-top:20px">
+      <div class="download-title">💾 Download as MP3</div>
+      <div class="download-sub">
+        Save the speech audio directly to your computer.<br/>
+        Uses Google Text-to-Speech for high quality voices.
+      </div>
+      <div class="download-row">
+        <button class="ctrl-btn btn-download" id="btn-dl-normal" onclick="downloadMP3(false)">
+          ⬇ Download MP3 (Normal Speed)
+        </button>
+        <button class="ctrl-btn btn-download" id="btn-dl-slow" onclick="downloadMP3(true)">
+          ⬇ Download MP3 (Slow Speed)
+        </button>
+      </div>
+      <div id="dl-status" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const VOICE_STYLES = [
+  {id:'natural',   e:'😊', n:'Natural',     d:'Clear, friendly everyday voice',    rate:1.0,  pitch:1.0},
+  {id:'calm',      e:'🧘', n:'Calm',        d:'Slow, relaxed, peaceful tone',      rate:0.82, pitch:0.88},
+  {id:'confident', e:'💼', n:'Confident',   d:'Clear, authoritative, professional',rate:1.05, pitch:1.0},
+  {id:'excited',   e:'🎉', n:'Excited',     d:'Energetic and enthusiastic',        rate:1.35, pitch:1.3},
+  {id:'news',      e:'📺', n:'News Anchor', d:'Crisp, neutral, professional',      rate:1.1,  pitch:1.0},
+  {id:'story',     e:'📖', n:'Storyteller', d:'Warm, expressive, engaging',        rate:0.95, pitch:1.08},
+  {id:'academic',  e:'🎓', n:'Academic',    d:'Measured, precise and clear',       rate:0.95, pitch:1.0},
+  {id:'friendly',  e:'😄', n:'Friendly',    d:'Warm, cheerful and upbeat',         rate:1.1,  pitch:1.2},
+  {id:'serious',   e:'🎯', n:'Serious',     d:'Deep, authoritative, formal',       rate:0.9,  pitch:0.85},
+  {id:'robot',     e:'🤖', n:'Robot',       d:'Flat, monotone, mechanical',        rate:0.88, pitch:0.52},
+  {id:'whisper',   e:'🤫', n:'Whisper',     d:'Soft, quiet and hushed',            rate:0.78, pitch:0.75},
+  {id:'dramatic',  e:'🎭', n:'Dramatic',    d:'Theatrical, expressive, bold',      rate:0.88, pitch:1.28},
+];
+
+const SAMPLES = {
+  'te-IN':'నమస్కారం! ఈ రోజు మీరు VoiceForge ని ఉపయోగిస్తున్నారు. ఇది మీ మాటలను స్పష్టంగా వినిపిస్తుంది. తెలుగు భాషలో మాట్లాడటం చాలా సుందరంగా ఉంటుంది.',
+  'hi-IN':'नमस्ते! आज आप VoiceForge का उपयोग कर रहे हैं। यह आपके शब्दों को स्पष्ट और प्राकृतिक आवाज़ में बोलता है। हिंदी भाषा बहुत मधुर होती है।',
+  'mr-IN':'नमस्कार! आज तुम्ही VoiceForge वापरत आहात. हे तुमचे शब्द स्पष्ट आणि नैसर्गिक आवाजात बोलते. मराठी भाषा खूप गोड आहे.',
+  'ta-IN':'வணக்கம்! இன்று நீங்கள் VoiceForge பயன்படுத்துகிறீர்கள். இது உங்கள் வார்த்தைகளை தெளிவாக மற்றும் இயற்கையாக பேசுகிறது.',
+  'gu-IN':'નમસ્તે! આજે તમે VoiceForge ઉપયોગ કરી રહ્યા છો. આ તમારા શબ્દોને સ્પષ્ટ અને સ્વાભાવિક અવાજમાં બોલે છે.',
+  'kn-IN':'ನಮಸ್ಕಾರ! ಇಂದು ನೀವು VoiceForge ಬಳಸುತ್ತಿದ್ದೀರಿ. ಇದು ನಿಮ್ಮ ಮಾತುಗಳನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ಮತ್ತು ನೈಸರ್ಗಿಕವಾಗಿ ಮಾತನಾಡುತ್ತದೆ.',
+  'ml-IN':'നമസ്കാരം! ഇന്ന് നിങ്ങൾ VoiceForge ഉപയോഗിക്കുന്നു. ഇത് നിങ്ങളുടെ വാക്കുകൾ വ്യക്തമായും സ്വാഭാവികമായും സംസാരിക്കുന്നു.',
+  'bn-IN':'নমস্কার! আজ আপনি VoiceForge ব্যবহার করছেন। এটি আপনার কথাগুলি স্পষ্ট এবং স্বাভাবিক কণ্ঠে বলে। বাংলা ভাষা অনেক সুন্দর।',
+  'pa-IN':'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਅੱਜ ਤੁਸੀਂ VoiceForge ਵਰਤ ਰਹੇ ਹੋ। ਇਹ ਤੁਹਾਡੇ ਸ਼ਬਦਾਂ ਨੂੰ ਸਪਸ਼ਟ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਦਾ ਹੈ।',
+  'ur-PK':'السلام علیکم! آج آپ VoiceForge استعمال کر رہے ہیں۔ یہ آپ کے الفاظ کو واضح اور قدرتی آواز میں بولتا ہے۔',
+  'en-IN':'Hello! Welcome to VoiceForge. This is a powerful text to speech studio. You can type or paste any text and hear it spoken in a natural human voice. Try different voice styles for different effects.',
+  'en-US':'Hello! Welcome to VoiceForge, your personal text-to-speech studio. Type any text and hear it spoken naturally. You can choose from twelve different voice styles including calm, excited, dramatic, and more.',
+  'en-GB':'Hello! Welcome to VoiceForge. This is a wonderful text to speech application. You may type any text and listen to it spoken in a clear, natural British voice.',
+  'es-ES':'¡Hola! Bienvenido a VoiceForge. Este es tu estudio personal de texto a voz. Escribe cualquier texto y escúchalo en una voz natural.',
+  'fr-FR':'Bonjour! Bienvenue sur VoiceForge. C\'est votre studio de synthèse vocale. Tapez n\'importe quel texte et écoutez-le dans une voix naturelle.',
+  'de-DE':'Hallo! Willkommen bei VoiceForge. Dies ist Ihr persönliches Text-to-Speech-Studio. Geben Sie beliebigen Text ein und hören Sie ihn in natürlicher Stimme.',
+  'ja-JP':'こんにちは！VoiceForgeへようこそ。これはあなたの個人的なテキスト音声スタジオです。任意のテキストを入力して、自然な声で聞いてください。',
+  'zh-CN':'你好！欢迎使用VoiceForge。这是您的个人文字转语音工作室。输入任何文字，用自然的声音聆听。',
+  'ar-SA':'مرحباً! أهلاً بك في VoiceForge. هذا استوديو تحويل النص إلى كلام. اكتب أي نص واستمع إليه بصوت طبيعي.',
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let allVoices    = [];
+let selVoice     = null;
+let selStyle     = VOICE_STYLES[0];
+let gender       = 'female';
+let sentences    = [];
+let sentIdx      = 0;
+let playState    = 'stopped';
+
+const FEMALE_KW = ['female','woman','girl','zira','samantha','victoria','karen','moira','fiona','tessa','alice','allison','ava','amelie','anna'];
+const MALE_KW   = ['male','man','guy','david','mark','daniel','fred','thomas','diego','luca','mario','henrik'];
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(!window.speechSynthesis){ toast('⚠️ Use Chrome or Edge browser for TTS support','e',8000); }
+  buildStyles();
+  loadVoices();
+  speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  // pre-load sample
+  document.getElementById('main-text').value = SAMPLES['en-IN'] || '';
+  updateStats();
+});
+
+// ══════════════════════════════════════════
+//  VOICE STYLES
+// ══════════════════════════════════════════
+function buildStyles(){
+  const g = document.getElementById('voice-versions');
+  g.innerHTML = VOICE_STYLES.map(s=>`
+    <div class="vv-card${s.id===selStyle.id?' active':''}" id="vs-${s.id}" onclick="selectStyle('${s.id}')">
+      <div class="vv-emoji">${s.e}</div>
+      <div class="vv-name">${s.n}</div>
+      <div class="vv-desc">${s.d}</div>
+      <div class="vv-params">Speed ${s.rate}× · Pitch ${s.pitch}</div>
+    </div>`).join('');
+}
+
+function selectStyle(id){
+  selStyle = VOICE_STYLES.find(s=>s.id===id);
+  document.querySelectorAll('.vv-card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('vs-'+id).classList.add('active');
+  document.getElementById('rate-sl').value  = selStyle.rate;
+  document.getElementById('pitch-sl').value = selStyle.pitch;
+  onSlider('rate'); onSlider('pitch');
+  toast(`${selStyle.e} Style: ${selStyle.n}`,'i',1800);
+}
+
+// ══════════════════════════════════════════
+//  VOICES
+// ══════════════════════════════════════════
+function loadVoices(){
+  const v = speechSynthesis.getVoices();
+  if(v.length){ allVoices=v; refreshVoiceDrop(); }
+  else setTimeout(loadVoices,300);
+}
+
+function refreshVoiceDrop(){
+  const code = document.getElementById('lang-select').value.toLowerCase();
+  const pre  = code.split('-')[0];
+  let voices = allVoices.filter(v=>v.lang.toLowerCase()===code);
+  if(!voices.length) voices=allVoices.filter(v=>v.lang.toLowerCase().startsWith(pre));
+  if(!voices.length) voices=allVoices;
+
+  const gv = voices.filter(v=>{
+    const n=v.name.toLowerCase();
+    if(gender==='female') return FEMALE_KW.some(k=>n.includes(k))||!MALE_KW.some(k=>n.includes(k));
+    return MALE_KW.some(k=>n.includes(k))||!FEMALE_KW.some(k=>n.includes(k));
+  });
+  const final = gv.length ? gv : voices;
+
+  const sel = document.getElementById('voice-select');
+  sel.innerHTML='';
+  const warn=document.getElementById('warn-box');
+  document.getElementById('voice-count').textContent=`(${final.length})`;
+
+  if(!final.length){
+    sel.innerHTML='<option>No voices — install from Windows Settings → Speech</option>';
+    warn.style.display='block'; selVoice=null; showVoiceInfo(); return;
+  }
+  warn.style.display='none';
+  final.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} [${v.lang}]${v.localService?' ⭐':''}`; sel.appendChild(o); });
+  selVoice=final[0];
+  sel.onchange=()=>{ selVoice=final.find(v=>v.name===sel.value)||null; showVoiceInfo(); };
+  showVoiceInfo();
+}
+
+function showVoiceInfo(){
+  const el=document.getElementById('voice-info');
+  if(!selVoice){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML=`<span>🎤 <strong>${selVoice.name}</strong></span>
+    <span>🌐 ${selVoice.lang}</span>
+    <span>${selVoice.localService?'💾 Offline':'☁️ Online'}</span>`;
+}
+
+function setGender(g){
+  gender=g;
+  document.getElementById('gpill-female').classList.toggle('active',g==='female');
+  document.getElementById('gpill-male').classList.toggle('active',g==='male');
+  refreshVoiceDrop();
+}
+
+function onLangChange(){
+  refreshVoiceDrop();
+  const code=document.getElementById('lang-select').value;
+  if(SAMPLES[code]){ document.getElementById('main-text').value=SAMPLES[code]; updateStats(); }
+}
+
+// ══════════════════════════════════════════
+//  SLIDERS
+// ══════════════════════════════════════════
+function onSlider(t){
+  if(t==='rate'){ const v=parseFloat(document.getElementById('rate-sl').value); document.getElementById('rate-val').textContent=v.toFixed(2)+'×'; }
+  else if(t==='pitch'){ const v=parseFloat(document.getElementById('pitch-sl').value); document.getElementById('pitch-val').textContent=v.toFixed(2); }
+  else { const v=parseFloat(document.getElementById('vol-sl').value); document.getElementById('vol-val').textContent=v.toFixed(2); }
+}
+
+// ══════════════════════════════════════════
+//  TTS PLAYBACK
+// ══════════════════════════════════════════
+function splitSents(t){ return (t.match(/[^.!?।\n]+[.!?।\n]*/g)||[t]).map(s=>s.trim()).filter(Boolean); }
+
+function doPlay(){
+  const txt=document.getElementById('main-text').value.trim();
+  if(!txt){ toast('⚠️ Please enter some text!','w'); return; }
+  if(!window.speechSynthesis){ toast('❌ TTS not supported. Use Chrome.','e'); return; }
+  speechSynthesis.cancel();
+  sentences=splitSents(txt); sentIdx=0;
+  setProgress(0); setState('playing'); renderSpoken(-1);
+  speak(0);
+}
+
+function speak(idx){
+  if(idx>=sentences.length){ setState('stopped'); setProgress(100); renderSpoken(-1); return; }
+  const u=new SpeechSynthesisUtterance(sentences[idx]);
+  if(selVoice) u.voice=selVoice;
+  u.rate   =parseFloat(document.getElementById('rate-sl').value);
+  u.pitch  =parseFloat(document.getElementById('pitch-sl').value);
+  u.volume =parseFloat(document.getElementById('vol-sl').value);
+  u.lang   =document.getElementById('lang-select').value;
+  renderSpoken(idx);
+  u.onend=()=>{ sentIdx=idx+1; setProgress(Math.round((sentIdx/sentences.length)*100)); speak(sentIdx); };
+  u.onerror=e=>{ if(e.error!=='interrupted'&&e.error!=='canceled'){ toast('Error: '+e.error,'e'); setState('stopped'); } };
+  speechSynthesis.speak(u);
+}
+
+function doPause(){ speechSynthesis.pause(); setState('paused'); }
+function doResume(){ speechSynthesis.resume(); setState('playing'); }
+function doStop(){ speechSynthesis.cancel(); setState('stopped'); setProgress(0); renderSpoken(-1); sentIdx=0; }
+
+function setState(s){
+  playState=s;
+  const wv=document.getElementById('waveform');
+  wv.className='wave-wrap '+(s==='playing'?'':s);
+  document.getElementById('live-badge').style.display=s==='playing'?'flex':'none';
+  document.getElementById('btn-play').disabled  =s==='playing';
+  document.getElementById('btn-pause').disabled =s!=='playing';
+  document.getElementById('btn-resume').disabled=s!=='paused';
+  document.getElementById('btn-stop').disabled  =s==='stopped';
+  const sr=document.getElementById('status-row');
+  if(s==='playing')      sr.innerHTML='<span class="status-pill sp-playing">🔊 Speaking...</span>';
+  else if(s==='paused')  sr.innerHTML='<span class="status-pill sp-paused">⏸ Paused</span>';
+  else if(s==='stopped'&&sentIdx>0) sr.innerHTML='<span class="status-pill sp-done">✅ Complete</span>';
+  else sr.innerHTML='';
+}
+
+function setProgress(pct){
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('sent-info').textContent=
+    sentences.length>0&&sentIdx>=0?`Sentence ${Math.min(sentIdx+1,sentences.length)} of ${sentences.length}`:'Ready to speak';
+}
+
+function renderSpoken(idx){
+  const sec=document.getElementById('spoken-section');
+  const box=document.getElementById('spoken-box');
+  if(idx<0||!sentences.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  box.innerHTML=sentences.map((s,i)=>`<span class="${i===idx?'s-active':i<idx?'s-done':'s-pending'}">${s} </span>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  MP3 DOWNLOAD
+// ══════════════════════════════════════════
+async function downloadMP3(slow){
+  const text=document.getElementById('main-text').value.trim();
+  if(!text){ toast('⚠️ Please enter text first!','w'); return; }
+
+  const btnId = slow ? 'btn-dl-slow' : 'btn-dl-normal';
+  const btn   = document.getElementById(btnId);
+  const status= document.getElementById('dl-status');
+
+  btn.classList.add('loading');
+  btn.textContent='⏳ Generating MP3...';
+  status.textContent='Connecting to Google TTS...';
+
+  const lang = document.getElementById('lang-select').value;
+
+  try{
+    const res = await fetch('/download-mp3',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text, lang, slow})
+    });
+
+    if(!res.ok){
+      const err=await res.json();
+      throw new Error(err.error||'Server error');
+    }
+
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `voiceforge_${lang}_${slow?'slow':'normal'}.mp3`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast('✅ MP3 downloaded successfully!','s');
+    status.textContent='✅ MP3 saved to your Downloads folder!';
+  } catch(err){
+    toast('❌ Download failed: '+err.message,'e');
+    status.innerHTML=`❌ Error: ${err.message}<br><small>Make sure you ran: <strong>pip install gtts</strong></small>`;
+  } finally{
+    btn.classList.remove('loading');
+    btn.textContent = slow ? '⬇ Download MP3 (Slow Speed)' : '⬇ Download MP3 (Normal Speed)';
+  }
+}
+
+// ══════════════════════════════════════════
+//  FILE UPLOADS
+// ══════════════════════════════════════════
+function handleTxt(inp){
+  const f=inp.files[0]; if(!f) return; inp.value='';
+  const r=new FileReader();
+  r.onload=e=>{ document.getElementById('main-text').value=e.target.result; updateStats(); toast('✅ File loaded!','s'); };
+  r.onerror=()=>toast('❌ Failed to read file','e');
+  r.readAsText(f);
+}
+
+async function handlePDF(inp){
+  const f=inp.files[0]; if(!f) return; inp.value='';
+  toast('⏳ Extracting PDF text...','i');
+  try{
+    if(!window.pdfjsLib) throw new Error('PDF.js not loaded');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf=await f.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let out='';
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const ct=await page.getTextContent();
+      out+=ct.items.map(x=>x.str).join(' ')+'\n';
+    }
+    document.getElementById('main-text').value=out.trim();
+    updateStats();
+    toast(`✅ PDF loaded — ${pdf.numPages} pages`,'s');
+  } catch(err){ toast('❌ '+err.message,'e'); }
+}
+
+function clearText(){ document.getElementById('main-text').value=''; updateStats(); }
+
+function loadSample(){
+  const code=document.getElementById('lang-select').value;
+  const t=SAMPLES[code]||SAMPLES['en-IN'];
+  document.getElementById('main-text').value=t;
+  updateStats();
+  toast('✨ Sample text loaded!','s',1500);
+}
+
+function updateStats(){
+  const t=document.getElementById('main-text').value;
+  const w=t.trim()?t.trim().split(/\s+/).length:0;
+  document.getElementById('char-count').textContent=`${t.length.toLocaleString()} characters · ${w.toLocaleString()} words`;
+  document.getElementById('time-est').textContent=w>0?`~${Math.ceil(w/150)} min read`:'Ready';
+}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+let _tid=0;
+function toast(msg,type='i',dur=3500){
+  const id=++_tid;
+  const el=document.createElement('div');
+  el.className=`toast t${type}`;
+  el.textContent=msg;
+  el.onclick=()=>el.remove();
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); },dur);
+}
+</script>
+</body>
+</html>
