@@ -51,6 +51,7 @@ No complicated setup. No cloud account needed for live playback. Just run and sp
 
 | 📊 Live Progress | 🌊 Waveform Viz | ☁️ Vercel Ready |
 |:---:|:---:|:---:|
+https://voiceforge-studio-liart.vercel.app/
 | Sentence-by-sentence | Animated header bars | One-command deploy |
 
 </div>
