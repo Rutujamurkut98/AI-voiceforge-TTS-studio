@@ -25,6 +25,12 @@
 
 <br/>
 
+### 🚀 [**Try it Live → voiceforge-studio-liart.vercel.app**](https://voiceforge-studio-liart.vercel.app/)
+
+[![Live Demo](https://img.shields.io/badge/🎙️%20LIVE%20DEMO-Click%20to%20Try%20Now!-4f6ef7?style=for-the-badge&labelColor=1a1d2e)](https://voiceforge-studio-liart.vercel.app/)
+
+<br/>
+
 </div>
 
 ---
@@ -51,7 +57,6 @@ No complicated setup. No cloud account needed for live playback. Just run and sp
 
 | 📊 Live Progress | 🌊 Waveform Viz | ☁️ Vercel Ready |
 |:---:|:---:|:---:|
-https://voiceforge-studio-liart.vercel.app/
 | Sentence-by-sentence | Animated header bars | One-command deploy |
 
 </div>
@@ -295,6 +300,8 @@ MIT License — Free to use, modify, and distribute.
 **Made with ❤️ using Flask · gTTS · Web Speech API**
 
 ⭐ **Star this repo if VoiceForge helped you!** ⭐
+
+[![Live Demo](https://img.shields.io/badge/🎙️%20Try%20VoiceForge%20Live-voiceforge--studio--liart.vercel.app-4f6ef7?style=for-the-badge&labelColor=1a1d2e)](https://voiceforge-studio-liart.vercel.app/)
 
 `🎙️ VoiceForge — Because every word deserves to be heard`
 
